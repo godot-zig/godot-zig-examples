@@ -8,8 +8,8 @@ color_rect: *Godot.ColorRect = undefined,
 
 pub fn _bind_methods() void {
     Godot.registerSignal(Self, "signal1", &[_]Godot.PropertyInfo{
-        Godot.PropertyInfo.init(Godot.C.GDEXTENSION_VARIANT_TYPE_STRING, Godot.StringName.initFromLatin1Chars("name")),
-        Godot.PropertyInfo.init(Godot.C.GDEXTENSION_VARIANT_TYPE_VECTOR3, Godot.StringName.initFromLatin1Chars("position")),
+        Godot.PropertyInfo.init(Godot.GDEXTENSION_VARIANT_TYPE_STRING, Godot.StringName.initFromLatin1Chars("name")),
+        Godot.PropertyInfo.init(Godot.GDEXTENSION_VARIANT_TYPE_VECTOR3, Godot.StringName.initFromLatin1Chars("position")),
     });
 
     Godot.registerSignal(Self, "signal2", &.{});
