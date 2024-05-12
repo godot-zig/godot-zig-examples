@@ -63,7 +63,7 @@ pub fn _enter_tree(self: *Self) void {
 
     if (Godot.Engine.getSingleton().is_editor_hint()) return;
 
-    const window_size = self.get_tree().get_root().get_size();
+    const window_size = self.get_tree().?.get_root().?.get_size();
     var sp = Godot.HSplitContainer.newHSplitContainer();
     sp.set_h_size_flags(Godot.Control.SIZE_EXPAND_FILL);
     sp.set_v_size_flags(Godot.Control.SIZE_EXPAND_FILL);
@@ -73,7 +73,7 @@ pub fn _enter_tree(self: *Self) void {
     inline for (0..Examples.len) |i| {
         _ = itemList.add_item(Examples[i].name, null, true);
     }
-    var timer = self.get_tree().create_timer(1.0, true, false, false);
+    var timer = self.get_tree().?.create_timer(1.0, true, false, false).?;
     defer _ = timer.unreference();
 
     Godot.connect(timer, "timeout", self, "onTimeout");
@@ -97,7 +97,7 @@ pub fn _exit_tree(self: *Self) void {
 pub fn _notification(self: *Self, what: i32) void {
     if (what == Godot.Node.NOTIFICATION_WM_CLOSE_REQUEST) {
         if (!Godot.Engine.getSingleton().is_editor_hint()) {
-            self.get_tree().quit(0);
+            self.get_tree().?.quit(0);
         }
     }
 }
