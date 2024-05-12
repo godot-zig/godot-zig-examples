@@ -1,6 +1,7 @@
 const std = @import("std");
 const Godot = @import("godot");
-const Vector2 = Godot.Vector2;
+const Vec2 = Godot.Vector2;
+const Vec3 = Godot.Vector3;
 const SpritesNode = @import("SpriteNode.zig");
 const GuiNode = @import("GuiNode.zig");
 const SignalNode = @import("SignalNode.zig");
@@ -17,8 +18,8 @@ godot_object: *Godot.Node,
 panel: *Godot.PanelContainer = undefined,
 example_node: ?Godot.Node = null,
 
-property1: Godot.Vector3 = Godot.Vector3{ 42, 42, 42 },
-property2: Godot.Vector3 = Godot.Vector3{ 24, 24, 24 },
+property1: Vec3 = Vec3.set(42),
+property2: Vec3 = Vec3.set(24),
 
 const property1_name: [:0]const u8 = "Property1";
 const property2_name: [:0]const u8 = "Property2";
@@ -58,8 +59,8 @@ pub fn _enter_tree(self: *Self) void {
 
     //initialize fields
     self.example_node = null;
-    self.property1 = Godot.Vector3{ 111, 111, 111 };
-    self.property2 = Godot.Vector3{ 222, 222, 222 };
+    self.property1 = Vec3.new(111, 111, 111);
+    self.property2 = Vec3.new(222, 222, 222);
 
     if (Godot.Engine.getSingleton().is_editor_hint()) return;
 
@@ -67,7 +68,7 @@ pub fn _enter_tree(self: *Self) void {
     var sp = Godot.HSplitContainer.newHSplitContainer();
     sp.set_h_size_flags(Godot.Control.SIZE_EXPAND_FILL);
     sp.set_v_size_flags(Godot.Control.SIZE_EXPAND_FILL);
-    sp.set_split_offset(@intFromFloat(@as(f32, @floatFromInt(window_size[0])) * 0.2));
+    sp.set_split_offset(@intFromFloat(@as(f32, @floatFromInt(window_size.x)) * 0.2));
     sp.set_anchors_preset(Godot.Control.PRESET_FULL_RECT, false);
     var itemList = Godot.ItemList.newItemList();
     inline for (0..Examples.len) |i| {
@@ -125,10 +126,10 @@ pub fn _property_can_revert(_: *Self, name: Godot.StringName) bool {
 
 pub fn _property_get_revert(_: *Self, name: Godot.StringName, value: *Godot.Variant) bool {
     if (name.casecmp_to(property1_name) == 0) {
-        value.* = Godot.Variant.initFrom(Godot.Vector3{ 42, 42, 42 });
+        value.* = Godot.Variant.initFrom(Vec3.new(42, 42, 42));
         return true;
     } else if (name.casecmp_to(property2_name) == 0) {
-        value.* = Godot.Variant.initFrom(Godot.Vector3{ 24, 24, 24 });
+        value.* = Godot.Variant.initFrom(Vec3.new(24, 24, 24));
         return true;
     }
 
@@ -137,10 +138,10 @@ pub fn _property_get_revert(_: *Self, name: Godot.StringName, value: *Godot.Vari
 
 pub fn _set(self: *Self, name: Godot.StringName, value: Godot.Variant) bool {
     if (name.casecmp_to(property1_name) == 0) {
-        self.property1 = value.as(Godot.Vector3);
+        self.property1 = value.as(Vec3);
         return true;
     } else if (name.casecmp_to(property2_name) == 0) {
-        self.property2 = value.as(Godot.Vector3);
+        self.property2 = value.as(Vec3);
         return true;
     }
 

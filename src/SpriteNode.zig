@@ -1,10 +1,10 @@
 const std = @import("std");
 const Godot = @import("godot");
-const Vector2 = Godot.Vector2;
+const Vec2 = Godot.Vector2;
 const Sprite = struct {
-    pos: Godot.Vector2,
-    vel: Godot.Vector2,
-    scale: Godot.Vector2,
+    pos: Vec2,
+    vel: Vec2,
+    scale: Vec2,
     gd_sprite: *Godot.Sprite2D,
 };
 const Self = @This();
@@ -33,9 +33,9 @@ pub fn _ready(self: *Self) void {
     for (0..10000) |_| {
         const s: f32 = @floatCast(rnd.randf_range(0.1, 0.2));
         const spr = Sprite{
-            .pos = Godot.Vector2{ @floatCast(rnd.randf_range(0, sz[0])), @floatCast(rnd.randf_range(0, sz[1])) },
-            .vel = Godot.Vector2{ @floatCast(rnd.randf_range(-1000, 1000)), @floatCast(rnd.randf_range(-1000, 1000)) },
-            .scale = Godot.Vector2{ s, s },
+            .pos = Vec2.new(@floatCast(rnd.randf_range(0, sz.x)), @floatCast(rnd.randf_range(0, sz.y))),
+            .vel = Vec2.new(@floatCast(rnd.randf_range(-1000, 1000)), @floatCast(rnd.randf_range(-1000, 1000))),
+            .scale = Vec2.set(s),
             .gd_sprite = Godot.Sprite2D.newSprite2D(),
         };
         spr.gd_sprite.set_texture(tex);
@@ -56,18 +56,18 @@ pub fn _physics_process(self: *Self, delta: f64) void {
     const sz = self.get_parent_area_size(); //get_size();
 
     for (self.sprites.items) |*spr| {
-        const pos = spr.pos + spr.vel * Vector2{ @floatCast(delta), @floatCast(delta) };
-        const spr_size = spr.gd_sprite.get_rect().get_size() * spr.gd_sprite.get_scale();
+        const pos = spr.pos.add(spr.vel.scale(@floatCast(delta)));
+        const spr_size = spr.gd_sprite.get_rect().get_size().mul(spr.gd_sprite.get_scale());
 
-        if (pos[0] <= spr_size[0] / 2) {
-            spr.vel[0] = @abs(spr.vel[0]);
-        } else if (pos[0] >= sz[0] - spr_size[0] / 2) {
-            spr.vel[0] = -@abs(spr.vel[0]);
+        if (pos.x <= spr_size.x / 2) {
+            spr.vel.x = @abs(spr.vel.x);
+        } else if (pos.x >= sz.x - spr_size.x / 2) {
+            spr.vel.x = -@abs(spr.vel.x);
         }
-        if (pos[1] <= spr_size[1] / 2) {
-            spr.vel[1] = @abs(spr.vel[1]);
-        } else if (pos[1] >= sz[1] - spr_size[1] / 2) {
-            spr.vel[1] = -@abs(spr.vel[1]);
+        if (pos.y <= spr_size.y / 2) {
+            spr.vel.y = @abs(spr.vel.y);
+        } else if (pos.y >= sz.y - spr_size.y / 2) {
+            spr.vel.y = -@abs(spr.vel.y);
         }
         spr.pos = pos;
         spr.gd_sprite.set_position(spr.pos);

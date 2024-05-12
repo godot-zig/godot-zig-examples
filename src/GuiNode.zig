@@ -1,5 +1,6 @@
 const std = @import("std");
 const Godot = @import("godot");
+const Vec2 = Godot.Vector2;
 const Self = @This();
 
 pub usingnamespace Godot.Control;
@@ -12,14 +13,14 @@ pub fn _enter_tree(self: *Self) void {
 
     var normal_btn = Godot.Button.newButton();
     self.add_child(normal_btn, false, Godot.Node.INTERNAL_MODE_DISABLED);
-    normal_btn.set_position(.{ 100, 20 }, false);
-    normal_btn.set_size(.{ 100, 50 }, false);
+    normal_btn.set_position(Vec2.new(100, 20), false);
+    normal_btn.set_size(Vec2.new(100, 50), false);
     normal_btn.set_text("Press Me");
 
     var toggle_btn = Godot.CheckBox.newCheckBox();
     self.add_child(toggle_btn, false, Godot.Node.INTERNAL_MODE_DISABLED);
-    toggle_btn.set_position(.{ 320, 20 }, false);
-    toggle_btn.set_size(.{ 100, 50 }, false);
+    toggle_btn.set_position(Vec2.new(320, 20), false);
+    toggle_btn.set_size(Vec2.new(100, 50), false);
     toggle_btn.set_text("Toggle Me");
 
     Godot.connect(toggle_btn, "toggled", self, "onToggled");
@@ -30,8 +31,8 @@ pub fn _enter_tree(self: *Self) void {
     defer _ = Godot.unreference(tex);
     self.sprite = Godot.Sprite2D.newSprite2D();
     self.sprite.set_texture(tex);
-    self.sprite.set_position(.{ 400, 300 });
-    self.sprite.set_scale(.{ 0.6, 0.6 });
+    self.sprite.set_position(Vec2.new(400, 300));
+    self.sprite.set_scale(Vec2.new(0.6, 0.6));
     self.add_child(self.sprite, false, Godot.Node.INTERNAL_MODE_DISABLED);
 }
 
