@@ -24,10 +24,18 @@ property2: Vec3,
 const property1_name: [:0]const u8 = "Property1";
 const property2_name: [:0]const u8 = "Property2";
 
+pub fn init(self: *Self) void {
+    std.log.info("init {s}", .{@typeName(@TypeOf(self))});
+}
+
+pub fn deinit(self: *Self) void {
+    std.log.info("deinit {s}", .{@typeName(@TypeOf(self))});
+}
+
 fn clear_scene(self: *Self) void {
     if (self.example_node) |n| {
-        n.queue_free();
-        self.example_node = null;
+        Godot.destroy(n);
+        //n.queue_free(); //ok
     }
 }
 
@@ -44,8 +52,7 @@ pub fn on_item_focused(self: *Self, idx: i64) void {
     switch (idx) {
         inline 0...Examples.len - 1 => |i| {
             const n = Godot.create(Examples[i].T) catch unreachable;
-            //std.log.info("n={d} {d}", .{@intFromPtr(n), @intFromPtr(Godot.objectGetInstanceBinding())})
-            self.example_node = .{ .godot_object = n.base.godot_object }; //Godot classes in gdextension are just wrappers around a native pointer (godot_object in GodotZig).
+            self.example_node = Godot.cast(Godot.Node, n.base);
             self.panel.add_child(self.example_node, false, Godot.Node.INTERNAL_MODE_DISABLED);
             self.panel.grab_focus();
         },
