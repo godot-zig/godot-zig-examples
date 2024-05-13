@@ -13,38 +13,39 @@ const Examples = [_]struct { name: [:0]const u8, T: type }{
 
 const Self = @This();
 pub usingnamespace Godot.Node;
-godot_object: *Godot.Node,
+base: Godot.Node,
 
-panel: *Godot.PanelContainer = undefined,
+panel: Godot.PanelContainer,
 example_node: ?Godot.Node = null,
 
-property1: Vec3 = Vec3.set(42),
-property2: Vec3 = Vec3.set(24),
+property1: Vec3,
+property2: Vec3,
 
 const property1_name: [:0]const u8 = "Property1";
 const property2_name: [:0]const u8 = "Property2";
 
-fn clearScene(self: *Self) void {
+fn clear_scene(self: *Self) void {
     if (self.example_node) |n| {
         n.queue_free();
         self.example_node = null;
     }
 }
 
-pub fn onTimeout(_: *Self) void {
-    std.debug.print("onTimeout\n", .{});
+pub fn on_timeout(_: *Self) void {
+    std.debug.print("on_timeout\n", .{});
 }
 
-pub fn onResized(_: *Self) void {
-    std.debug.print("onResized\n", .{});
+pub fn on_resized(_: *Self) void {
+    std.debug.print("on_resized\n", .{});
 }
 
 pub fn on_item_focused(self: *Self, idx: i64) void {
-    self.clearScene();
+    self.clear_scene();
     switch (idx) {
         inline 0...Examples.len - 1 => |i| {
             const n = Godot.create(Examples[i].T) catch unreachable;
-            self.example_node = .{ .godot_object = n.godot_object }; //Godot classes in gdextension are just wrappers around a native pointer (godot_object in GodotZig).
+            //std.log.info("n={d} {d}", .{@intFromPtr(n), @intFromPtr(Godot.objectGetInstanceBinding())})
+            self.example_node = .{ .godot_object = n.base.godot_object }; //Godot classes in gdextension are just wrappers around a native pointer (godot_object in GodotZig).
             self.panel.add_child(self.example_node, false, Godot.Node.INTERNAL_MODE_DISABLED);
             self.panel.grab_focus();
         },
@@ -65,34 +66,33 @@ pub fn _enter_tree(self: *Self) void {
     if (Godot.Engine.getSingleton().is_editor_hint()) return;
 
     const window_size = self.get_tree().?.get_root().?.get_size();
-    var sp = Godot.HSplitContainer.newHSplitContainer();
+    var sp = Godot.initHSplitContainer();
     sp.set_h_size_flags(Godot.Control.SIZE_EXPAND_FILL);
     sp.set_v_size_flags(Godot.Control.SIZE_EXPAND_FILL);
     sp.set_split_offset(@intFromFloat(@as(f32, @floatFromInt(window_size.x)) * 0.2));
     sp.set_anchors_preset(Godot.Control.PRESET_FULL_RECT, false);
-    var itemList = Godot.ItemList.newItemList();
+    var itemList = Godot.initItemList();
     inline for (0..Examples.len) |i| {
         _ = itemList.add_item(Examples[i].name, null, true);
     }
-    var timer = self.get_tree().?.create_timer(1.0, true, false, false).?;
-    defer _ = timer.unreference();
+    var timer = self.get_tree().?.create_timer(1.0, true, false, false);
+    defer _ = timer.?.unreference();
 
-    Godot.connect(timer, "timeout", self, "onTimeout");
-    Godot.connect(sp, "resized", self, "onResized");
+    Godot.connect(timer.?, "timeout", self, "on_timeout");
+    Godot.connect(sp, "resized", self, "on_resized");
 
     Godot.connect(itemList, "item_selected", self, "on_item_focused");
-    self.panel = Godot.PanelContainer.newPanelContainer();
+    self.panel = Godot.initPanelContainer();
     self.panel.set_h_size_flags(Godot.Control.SIZE_FILL);
     self.panel.set_v_size_flags(Godot.Control.SIZE_FILL);
     self.panel.set_focus_mode(Godot.Control.FOCUS_ALL);
     sp.add_child(itemList, false, Godot.Node.INTERNAL_MODE_DISABLED);
     sp.add_child(self.panel, false, Godot.Node.INTERNAL_MODE_DISABLED);
-    self.add_child(sp, false, Godot.Node.INTERNAL_MODE_DISABLED);
+    self.base.add_child(sp, false, Godot.Node.INTERNAL_MODE_DISABLED);
 }
 
 pub fn _exit_tree(self: *Self) void {
     _ = self;
-    Godot.Engine.releaseSingleton();
 }
 
 pub fn _notification(self: *Self, what: i32) void {

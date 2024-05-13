@@ -5,11 +5,11 @@ const Sprite = struct {
     pos: Vec2,
     vel: Vec2,
     scale: Vec2,
-    gd_sprite: *Godot.Sprite2D,
+    gd_sprite: Godot.Sprite2D,
 };
 const Self = @This();
 pub usingnamespace Godot.Control;
-godot_object: *Godot.Control,
+base: Godot.Control,
 
 sprites: std.ArrayList(Sprite) = undefined,
 
@@ -22,12 +22,12 @@ pub fn _ready(self: *Self) void {
     if (Godot.Engine.getSingleton().is_editor_hint()) return;
 
     self.sprites = std.ArrayList(Sprite).init(Godot.general_allocator);
-    const rnd = Godot.RandomNumberGenerator.newRandomNumberGenerator();
+    const rnd = Godot.initRandomNumberGenerator();
     defer _ = Godot.unreference(rnd);
 
     const resource_loader = Godot.ResourceLoader.getSingleton();
-    const tex: *Godot.Texture2D = @ptrCast(resource_loader.load("res://textures/logo.png", "", Godot.ResourceLoader.CACHE_MODE_REUSE));
-    defer _ = Godot.unreference(tex);
+    const tex = resource_loader.load("res://textures/logo.png", "", Godot.ResourceLoader.CACHE_MODE_REUSE);
+    defer _ = Godot.unreference(tex.?);
     const sz = self.get_parent_area_size();
 
     for (0..10000) |_| {
@@ -36,7 +36,7 @@ pub fn _ready(self: *Self) void {
             .pos = Vec2.new(@floatCast(rnd.randf_range(0, sz.x)), @floatCast(rnd.randf_range(0, sz.y))),
             .vel = Vec2.new(@floatCast(rnd.randf_range(-1000, 1000)), @floatCast(rnd.randf_range(-1000, 1000))),
             .scale = Vec2.set(s),
-            .gd_sprite = Godot.Sprite2D.newSprite2D(),
+            .gd_sprite = Godot.initSprite2D(),
         };
         spr.gd_sprite.set_texture(tex);
         spr.gd_sprite.set_rotation(rnd.randf_range(0, 3.14));
@@ -48,8 +48,6 @@ pub fn _ready(self: *Self) void {
 
 pub fn _exit_tree(self: *Self) void {
     self.sprites.deinit();
-    Godot.Engine.releaseSingleton();
-    Godot.ResourceLoader.releaseSingleton();
 }
 
 pub fn _physics_process(self: *Self, delta: f64) void {
