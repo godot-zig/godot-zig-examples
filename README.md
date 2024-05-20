@@ -5,8 +5,7 @@ Examples for godot-zig
 
 1. git clone --recursive https://github.com/godot-zig/godot-zig-examples
 2. zig build bind
-3. godot -e --path ./project
-4. zig build run
+3. zig build run
 
 ## Options
 
