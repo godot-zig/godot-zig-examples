@@ -27,10 +27,21 @@ pub fn build(b: *std.Build) !void {
     b.lib_dir = "./project/lib";
     b.installArtifact(lib);
 
-    const run_cmd = b.addSystemCommand(&.{
-        godot_path, "--path", "./project",
+    const project_path = .{ .path = "./project" };
+    const load_cmd = b.addSystemCommand(&.{
+        godot_path, "--headless", "--quit", "--editor", "--path",
     });
-    run_cmd.step.dependOn(b.getInstallStep());
+    load_cmd.addDirectoryArg(project_path);
+    load_cmd.expectExitCode(1);
+    load_cmd.step.dependOn(b.getInstallStep());
+    const load_step = b.step("load", "Load project");
+    load_step.dependOn(&load_cmd.step);
+
+    const run_cmd = b.addSystemCommand(&.{
+        godot_path, "--path",
+    });
+    run_cmd.addDirectoryArg(project_path);
+    run_cmd.step.dependOn(load_step);
     const run_step = b.step("run", "Run with Godot");
     run_step.dependOn(&run_cmd.step);
 }
