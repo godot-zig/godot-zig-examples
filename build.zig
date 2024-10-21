@@ -7,7 +7,7 @@ pub fn build(b: *std.Build) !void {
 
     const lib = b.addSharedLibrary(.{
         .name = "example",
-        .root_source_file = .{ .path = "src/Entry.zig" },
+        .root_source_file = b.path("src/Entry.zig"),
         .target = target,
         .optimize = optimize,
     });
@@ -25,6 +25,7 @@ pub fn build(b: *std.Build) !void {
     /////////////////////////////////////////////////
 
     b.lib_dir = "./project/lib";
+    b.exe_dir = "./project/lib";
     b.installArtifact(lib);
 
     const run_cmd = b.addSystemCommand(&.{
