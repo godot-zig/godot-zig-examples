@@ -12,9 +12,15 @@ pub fn build(b: *std.Build) !void {
         .optimize = optimize,
     });
 
-    const godot_zig_build = @import("./godot-zig/build.zig");
-    const godot = godot_zig_build.createModule(b, target, optimize, godot_path);
+    const lib_godot = b.dependency("godot", .{
+        .godot_path = godot_path,
+    });
+
+    const godot = lib_godot.module("godot");
     lib.root_module.addImport("godot", godot);
+
+    var bind_step = b.step("bind", "Generate Godot bindings");
+    bind_step.dependOn(&lib_godot.builder.top_level_steps.get("bind").?.step);
 
     // use explicit imports to make jump work properly
     // todo: remove this once zls get improved
